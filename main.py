@@ -31,7 +31,7 @@ class Window(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("cappuccino.ui", self)
+        uic.loadUi("addEditCoffeeForm.ui", self)
         self.initUI()
         self.show_data()
 
