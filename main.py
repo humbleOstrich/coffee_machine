@@ -1,7 +1,31 @@
 import sqlite3
 import sys
-from PyQt5.QtWidgets import QApplication, QTableWidgetItem, QMainWindow
+from PyQt5.QtWidgets import QApplication, QTableWidgetItem, QMainWindow, QWidget
 from PyQt5 import uic
+
+
+class Window(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        uic.loadUi("espresso.ui", self)
+        self.initUi(args[1])
+
+    def initUi(self, args):
+        self.setWindowTitle('Эспрессо')
+        self.show_data(args)
+
+    def show_data(self, args):
+        self.tableWidget.setColumnCount(7)
+        self.tableWidget.setRowCount(0)
+        self.tableWidget.setHorizontalHeaderLabels(["id", "название", "степень обжарки",
+                                                    "молотый/в зернах", "описание", "цена", "объем упаковки"])
+        for i, row in enumerate(args):
+            self.tableWidget.setRowCount(
+                self.tableWidget.rowCount() + 1)
+            for j, elem in enumerate(row):
+                self.tableWidget.setItem(
+                    i, j, QTableWidgetItem(str(elem)))
+        self.tableWidget.resizeColumnsToContents()
 
 
 class MainWindow(QMainWindow):
@@ -13,7 +37,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         self.setGeometry(600, 600, 600, 600)
-        self.setWindowTitle('Эспрессо')
+        self.setWindowTitle('Капучино')
         self.connection = sqlite3.connect("espresso.db")
         self.tableWidget.itemChanged.connect(self.update_table)
         self.modified = {}
@@ -22,6 +46,8 @@ class MainWindow(QMainWindow):
     def show_data(self):
         cur = self.connection.cursor()
         data = cur.execute("""SELECT * FROM coffee""").fetchall()
+        self.new_window = Window(self, data)
+        self.new_window.show()
         self.titles = [description[0] for description in cur.description]
         self.tableWidget.setColumnCount(7)
         self.tableWidget.setRowCount(0)
@@ -48,6 +74,7 @@ class MainWindow(QMainWindow):
             cur.execute(que)
             self.connection.commit()
             self.modified.clear()
+            self.show_data()
 
     def add_item(self):
         values = [self.lineEdit.text(), self.lineEdit_2.text(), self.lineEdit_3.text(),
